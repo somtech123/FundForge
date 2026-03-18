@@ -36,6 +36,31 @@
 				"type": "error"
 			},
 			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "feesPaid",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "campaignId",
+						"type": "uint256"
+					}
+				],
+				"name": "CampaignCreated",
+				"type": "event"
+			},
+			{
 				"inputs": [],
 				"name": "CREATION_FEE",
 				"outputs": [
@@ -69,7 +94,7 @@
 						"type": "uint256"
 					}
 				],
-				"name": "campaign",
+				"name": "campaigns",
 				"outputs": [
 					{
 						"internalType": "address",
@@ -85,24 +110,10 @@
 						"internalType": "uint256",
 						"name": "goal",
 						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"name": "campaignCreated",
-				"outputs": [
+					},
 					{
 						"internalType": "uint256",
-						"name": "",
+						"name": "createdAt",
 						"type": "uint256"
 					}
 				],
@@ -164,11 +175,11 @@
 			]
 		},
 		"src/CrowdFundingFactory.sol": {
-			"keccak256": "0x5320db15625d9cc44873c8c89291b99995a72e2c8efafb3140102cdba7c99698",
+			"keccak256": "0xe92c9b149262a67249ba320f78f7149c19fcce827aa67a1c7f4c16bdc630bcd6",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://421fd563353b605f7a63266a2d741caa693141788c3c7ebb19694517674f8c4f",
-				"dweb:/ipfs/QmPCBeQPmnJ71JrrBaEG8Qdat1NLB1SrC9bZ7c9mQA1SVi"
+				"bzz-raw://47f9918f0b1b2a0b33d7802e649b9e19dafb92a5ad38d6422cf8e3ebcd607adf",
+				"dweb:/ipfs/QmbGSbUpc1pEaWGpB1f74MPghFhK2jDasZK1o9AqvvMd3Y"
 			]
 		},
 		"src/UnitConverter.sol": {
