@@ -1,0 +1,192 @@
+{
+	"compiler": {
+		"version": "0.8.30+commit.73712a01"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"name": "DeadLineToFar",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "DeadLineTooClose",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "InsufficientFee",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "InvalidDeadLine",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "InvalidGoal",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "LessThanMinimumGoal",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "CREATION_FEE",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "MINIMUM_USD",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "campaign",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "campaignAddress",
+						"type": "address"
+					},
+					{
+						"internalType": "address",
+						"name": "creator",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "goal",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"name": "campaignCreated",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_goal",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_deadine",
+						"type": "uint256"
+					}
+				],
+				"name": "createCampaign",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"src/CrowdFundingFactory.sol": "CrowdFundingFactory"
+		},
+		"evmVersion": "prague",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"src/Campaign.sol": {
+			"keccak256": "0x5a90ea2a07c36b1147d244de0cd113abc96e9c8962f4ca2971caacdc1bde6d4d",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://638036ec5c0e855b144f030b0a827a047fbf7a5091424f93b9f0ea05cb1366af",
+				"dweb:/ipfs/Qmb9Trjvbz7Xq7kNUcEA8gnNu5aWFNEKHwU1QYGRWRgbeH"
+			]
+		},
+		"src/CrowdFundingFactory.sol": {
+			"keccak256": "0x5320db15625d9cc44873c8c89291b99995a72e2c8efafb3140102cdba7c99698",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://421fd563353b605f7a63266a2d741caa693141788c3c7ebb19694517674f8c4f",
+				"dweb:/ipfs/QmPCBeQPmnJ71JrrBaEG8Qdat1NLB1SrC9bZ7c9mQA1SVi"
+			]
+		},
+		"src/UnitConverter.sol": {
+			"keccak256": "0xefeca1cc9335e2b72a9c08298aea992f3b70168b9833c4c9469f09659e89275b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://eb141aa6ff60c2d223b15864dfcdec5b4e1c6bdf689a11844438c71fce7081ac",
+				"dweb:/ipfs/QmTbLsReW7spBDcznw8pF7M4go3JSeMDMWQpyELRhhDVwa"
+			]
+		},
+		"src/error.sol": {
+			"keccak256": "0x493cca1119f292cfcd106d7d1ba1e58c1f3971ca27c40b823fa3792dd1886f57",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6007a5b8dbed131036fa25ea88a59521af39df7af9621d5c0f98d0e7f17e9553",
+				"dweb:/ipfs/QmXh6Gs9THN6Vn1eHWfPnLt5JCDSy8A98fW1bK8XcVgK3N"
+			]
+		}
+	},
+	"version": 1
+}

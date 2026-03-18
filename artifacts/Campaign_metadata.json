@@ -1,0 +1,62 @@
+{
+	"compiler": {
+		"version": "0.8.30+commit.73712a01"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_goal",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_deadine",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"src/Campaign.sol": "Campaign"
+		},
+		"evmVersion": "prague",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"src/Campaign.sol": {
+			"keccak256": "0x89ee4d95b281ce086ac474fc4bd6620d45420bc81cf79e333455893f2afe171a",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://d8565f3abf9e3368e1b81a69ac5552584d22760e86b347de397138475246b9f3",
+				"dweb:/ipfs/QmXBpboMd7xCHcEGDibhpM68SMkhYqTzWLwo2RcxvEw9vL"
+			]
+		}
+	},
+	"version": 1
+}
