@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
+// import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 import './Campaign.sol';
 import './UnitConverter.sol';
@@ -56,6 +57,13 @@ contract CrowdFundingFactory{
         campaignCounter++;
 
         emit CampaignCreated(msg.sender, msg.value, campaignCounter);
+
+        // refund excess creation fee
+        if(msg.value > CREATION_FEE){
+            uint256 refund = msg.value - CREATION_FEE;
+          (bool sucess, ) =  payable(msg.sender).call{value: refund}('');
+          require(sucess, "Refund Failed");
+        }
     
     }
 
