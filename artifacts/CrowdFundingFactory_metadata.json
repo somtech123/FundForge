@@ -7,6 +7,11 @@
 		"abi": [
 			{
 				"inputs": [],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"inputs": [],
 				"name": "DeadLineToFar",
 				"type": "error"
 			},
@@ -36,6 +41,28 @@
 				"type": "error"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "owner",
+						"type": "address"
+					}
+				],
+				"name": "OwnableInvalidOwner",
+				"type": "error"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "account",
+						"type": "address"
+					}
+				],
+				"name": "OwnableUnauthorizedAccount",
+				"type": "error"
+			},
+			{
 				"anonymous": false,
 				"inputs": [
 					{
@@ -58,6 +85,25 @@
 					}
 				],
 				"name": "CampaignCreated",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "previousOwner",
+						"type": "address"
+					},
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "OwnershipTransferred",
 				"type": "event"
 			},
 			{
@@ -94,7 +140,7 @@
 						"type": "uint256"
 					}
 				],
-				"name": "campaigns",
+				"name": "campaignInfo",
 				"outputs": [
 					{
 						"internalType": "address",
@@ -124,6 +170,25 @@
 				"inputs": [
 					{
 						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"name": "campaigns",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
 						"name": "_goal",
 						"type": "uint256"
 					},
@@ -137,11 +202,104 @@
 				"outputs": [],
 				"stateMutability": "payable",
 				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_campaign",
+						"type": "address"
+					}
+				],
+				"name": "isValidCampaign",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "renounceOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "newOwner",
+						"type": "address"
+					}
+				],
+				"name": "transferOwnership",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_campaign",
+						"type": "address"
+					}
+				],
+				"name": "verifyCampaign",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
 			}
 		],
 		"devdoc": {
+			"errors": {
+				"OwnableInvalidOwner(address)": [
+					{
+						"details": "The owner is not a valid owner account. (eg. `address(0)`)"
+					}
+				],
+				"OwnableUnauthorizedAccount(address)": [
+					{
+						"details": "The caller account is not authorized to perform an operation."
+					}
+				]
+			},
 			"kind": "dev",
-			"methods": {},
+			"methods": {
+				"owner()": {
+					"details": "Returns the address of the current owner."
+				},
+				"renounceOwnership()": {
+					"details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby disabling any functionality that is only available to the owner."
+				},
+				"transferOwnership(address)": {
+					"details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+				}
+			},
 			"version": 1
 		},
 		"userdoc": {
@@ -166,20 +324,36 @@
 		"remappings": []
 	},
 	"sources": {
-		"src/Campaign.sol": {
-			"keccak256": "0x5a90ea2a07c36b1147d244de0cd113abc96e9c8962f4ca2971caacdc1bde6d4d",
+		"@openzeppelin/contracts/access/Ownable.sol": {
+			"keccak256": "0xff6d0bb2e285473e5311d9d3caacb525ae3538a80758c10649a4d61029b017bb",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://638036ec5c0e855b144f030b0a827a047fbf7a5091424f93b9f0ea05cb1366af",
-				"dweb:/ipfs/Qmb9Trjvbz7Xq7kNUcEA8gnNu5aWFNEKHwU1QYGRWRgbeH"
+				"bzz-raw://8ed324d3920bb545059d66ab97d43e43ee85fd3bd52e03e401f020afb0b120f6",
+				"dweb:/ipfs/QmfEckWLmZkDDcoWrkEvMWhms66xwTLff9DDhegYpvHo1a"
+			]
+		},
+		"@openzeppelin/contracts/utils/Context.sol": {
+			"keccak256": "0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6a708e8a5bdb1011c2c381c9a5cfd8a9a956d7d0a9dc1bd8bcdaf52f76ef2f12",
+				"dweb:/ipfs/Qmax9WHBnVsZP46ZxEMNRQpLQnrdE4dK8LehML1Py8FowF"
+			]
+		},
+		"src/Campaign.sol": {
+			"keccak256": "0x9697ab988f54853e2812d2fc947e61cb03933c1c97bb9c2d201f7e442cacd4a3",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://814ecee9462e8f8af254241f658bf8144d5b4412467ad3f869d516b34fac2088",
+				"dweb:/ipfs/QmeaJPBSn2NpbCSn1DURoGEDihovYq5UFKjR3acNmaGfAX"
 			]
 		},
 		"src/CrowdFundingFactory.sol": {
-			"keccak256": "0x62b9aca2607a605855f9fca4b02d2a81dd427d761290e9c1ea87d58c489b202a",
+			"keccak256": "0xa4455a3b466142243b120e742827581b1472f611b872426d0c43e379bb5c9246",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://f250afa268904af671df0657463d5a0d6b1b8ad5717b2f24abd7d38104e1e63e",
-				"dweb:/ipfs/QmXEBHu68BDpwQJt6EXmzMN8dfaL6DXPqwbaeqABChCzQd"
+				"bzz-raw://d65e795166b23d5eafc678452bcc2e2e6df29c6972d564394e75b3a19e108d8d",
+				"dweb:/ipfs/QmcHhK9JSNMTvfXpNGKuhre6VUT2qq3ARELKWo1fm73Aex"
 			]
 		},
 		"src/UnitConverter.sol": {
@@ -191,11 +365,11 @@
 			]
 		},
 		"src/error.sol": {
-			"keccak256": "0x493cca1119f292cfcd106d7d1ba1e58c1f3971ca27c40b823fa3792dd1886f57",
+			"keccak256": "0x47deb73216ec6ae1fb6e58cdd67e7560cc37bd2adf10e4ce0f1d42c532ad6e96",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://6007a5b8dbed131036fa25ea88a59521af39df7af9621d5c0f98d0e7f17e9553",
-				"dweb:/ipfs/QmXh6Gs9THN6Vn1eHWfPnLt5JCDSy8A98fW1bK8XcVgK3N"
+				"bzz-raw://3fe7789c83f04ce96863467f56d59223f526c6d0c1f49f23a156af4567cb814c",
+				"dweb:/ipfs/Qmdne6fUN7wsseeFss1CaxE2rSRGj6xZXunzXC5FgHJTNf"
 			]
 		}
 	},

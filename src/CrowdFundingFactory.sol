@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
-// import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import './Campaign.sol';
 import './UnitConverter.sol';
 import './error.sol';
 
-contract CrowdFundingFactory{
+contract CrowdFundingFactory is Ownable{
 
     uint256 campaignCounter;
     uint256 constant public MINIMUM_USD = 1e16;
     uint256 constant public CREATION_FEE = 0.010 ether;
-
+    
 
    event CampaignCreated(address indexed creator, uint256 feesPaid, uint256 campaignId);
 
@@ -21,7 +21,16 @@ contract CrowdFundingFactory{
         uint256 goal;
         uint256 createdAt;
     }
-    mapping (uint256 => CampaignInfo) public campaigns;
+    mapping (uint256 => CampaignInfo) public campaignInfo;
+    mapping (address => bool) internal  isCampaign;
+
+    address [] public campaigns;
+
+
+    constructor() Ownable(msg.sender)
+    {
+        
+    }
 
    
     function createCampaign( uint256 _goal, uint256 _deadine) external payable   {
@@ -44,15 +53,19 @@ contract CrowdFundingFactory{
         Campaign _campaign = new Campaign(
             msg.sender,
             goal,
-            _deadine
+            block.timestamp + durationInDays
         );
 
-        campaigns[campaignCounter] = CampaignInfo({
+        campaigns.push(address(_campaign));
+
+        campaignInfo[campaignCounter] = CampaignInfo({
             campaignAddress: address(_campaign),
             creator: msg.sender,
             goal: goal,
             createdAt: block.timestamp
         });
+        
+        isCampaign[address(_campaign)] = true;
 
         campaignCounter++;
 
@@ -66,6 +79,27 @@ contract CrowdFundingFactory{
         }
     
     }
+
+    function isValidCampaign(address _campaign) external view returns(bool){
+        return isCampaign[_campaign];
+    }
+
+    function verifyCampaign(address _campaign) external view returns (bool){
+        if(!isCampaign[_campaign]) return false;
+
+        Campaign campaign = Campaign(_campaign);
+
+        return campaign.getFactory() == address(this);
+    }
+
+
+    // function setCreationFee(uint256 _amount) external onlyOwner{
+    //     if(_amount == 0) revert InsufficientFee();
+
+    //     uint256 amoutInwei = UnitConverter.toWei(_amount);
+
+    //     creation_fee = amoutInwei;
+    // }
 
 
 }
