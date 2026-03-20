@@ -57,7 +57,7 @@ contract CrowdFundingFactory is Ownable {
         if (durationInDays >= 365 days)
             revert CrowdFundingFactory__DeadLineToFar();
 
-        if (msg.value <= CREATION_FEE)
+        if (msg.value < CREATION_FEE)
             revert CrowdFundingFactory__InsufficientFee();
 
         uint256 goal = UnitConverter.toWei(_goal);
@@ -80,6 +80,8 @@ contract CrowdFundingFactory is Ownable {
         isCampaign[address(_campaign)] = true;
 
         campaignCounter++;
+
+        s_campaignCounter = campaignCounter;
 
         emit CampaignCreated(msg.sender, msg.value, campaignCounter);
 
@@ -105,9 +107,17 @@ contract CrowdFundingFactory is Ownable {
         return s_campaigns;
     }
 
-    // function isValidCampaign(address _campaign) external view returns (bool) {
-    //     return isCampaign[_campaign];
-    // }
+    function getCampaignCount() external view returns (uint256) {
+        return s_campaignCounter;
+    }
+
+    function getCampaign(uint256 _id) external view returns (address) {
+        return campaignInfo[_id].campaignAddress;
+    }
+
+    function isValidCampaign(address _campaign) external view returns (bool) {
+        return isCampaign[_campaign];
+    }
 
     // function verifyCampaign(address _campaign) external view returns (bool) {
     //     if (!isCampaign[_campaign]) return false;
@@ -115,13 +125,5 @@ contract CrowdFundingFactory is Ownable {
     //     Campaign campaign = Campaign(_campaign);
 
     //     return campaign.getFactory() == address(this);
-    // }
-
-    // function setCreationFee(uint256 _amount) external onlyOwner{
-    //     if(_amount == 0) revert InsufficientFee();
-
-    //     uint256 amoutInwei = UnitConverter.toWei(_amount);
-
-    //     creation_fee = amoutInwei;
     // }
 }
