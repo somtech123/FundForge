@@ -2,52 +2,64 @@
 pragma solidity ^0.8.24;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import './Campaign.sol';
-import './UnitConverter.sol';
-import './error.sol';
+import "./Campaign.sol";
+import "./UnitConverter.sol";
+// import "./error.sol";
 
-contract CrowdFundingFactory is Ownable{
-
-    uint256 campaignCounter;
-    uint256 constant public MINIMUM_USD = 1e16;
-    uint256 constant public CREATION_FEE = 0.010 ether;
-    
-
-   event CampaignCreated(address indexed creator, uint256 feesPaid, uint256 campaignId);
-
-    struct CampaignInfo{
+contract CrowdFundingFactory is Ownable {
+    struct CampaignInfo {
         address campaignAddress;
         address creator;
         uint256 goal;
         uint256 createdAt;
     }
-    mapping (uint256 => CampaignInfo) public campaignInfo;
-    mapping (address => bool) internal  isCampaign;
 
-    address [] public campaigns;
+    uint256 private s_campaignCounter;
 
+    uint256 private constant MINIMUM_USD = 1e16;
+    uint256 private constant CREATION_FEE = 0.010 ether;
 
-    constructor() Ownable(msg.sender)
-    {
-        
-    }
+    address[] private s_campaigns;
 
-   
-    function createCampaign( uint256 _goal, uint256 _deadine) external payable   {
+    mapping(uint256 => CampaignInfo) private campaignInfo;
+    mapping(address => bool) internal isCampaign;
+
+    event CampaignCreated(
+        address indexed creator,
+        uint256 feesPaid,
+        uint256 campaignId
+    );
+
+    error CrowdFundingFactory__LessThanMinimumGoal();
+    error CrowdFundingFactory__InvalidGoal();
+    error CrowdFundingFactory__InvalidDeadLine();
+    error CrowdFundingFactory__DeadLineToFar();
+    error CrowdFundingFactory__DeadLineTooClose();
+    error CrowdFundingFactory__InsufficientFee();
+
+    constructor() Ownable(msg.sender) {}
+
+    function createCampaign(uint256 _goal, uint256 _deadine) external payable {
         uint256 durationInDays = _deadine * 1 days;
-         
-        if(_goal == 0 ) revert InvalidGoal();
 
-        if(_goal < MINIMUM_USD) revert LessThanMinimumGoal();
+        uint256 campaignCounter = s_campaignCounter;
 
-        if(durationInDays == 0) revert InvalidDeadLine();
+        if (_goal == 0) revert CrowdFundingFactory__InvalidGoal();
 
-        if(durationInDays <=  1 days) revert DeadLineTooClose();
+        if (_goal < MINIMUM_USD)
+            revert CrowdFundingFactory__LessThanMinimumGoal();
 
-        if(durationInDays >=  365 days ) revert DeadLineToFar();
+        if (durationInDays == 0) revert CrowdFundingFactory__InvalidDeadLine();
 
-        if(msg.value <= CREATION_FEE) revert InsufficientFee();
-        
+        if (durationInDays <= 1 days)
+            revert CrowdFundingFactory__DeadLineTooClose();
+
+        if (durationInDays >= 365 days)
+            revert CrowdFundingFactory__DeadLineToFar();
+
+        if (msg.value <= CREATION_FEE)
+            revert CrowdFundingFactory__InsufficientFee();
+
         uint256 goal = UnitConverter.toWei(_goal);
 
         Campaign _campaign = new Campaign(
@@ -56,7 +68,7 @@ contract CrowdFundingFactory is Ownable{
             block.timestamp + durationInDays
         );
 
-        campaigns.push(address(_campaign));
+        s_campaigns.push(address(_campaign));
 
         campaignInfo[campaignCounter] = CampaignInfo({
             campaignAddress: address(_campaign),
@@ -64,7 +76,7 @@ contract CrowdFundingFactory is Ownable{
             goal: goal,
             createdAt: block.timestamp
         });
-        
+
         isCampaign[address(_campaign)] = true;
 
         campaignCounter++;
@@ -72,26 +84,38 @@ contract CrowdFundingFactory is Ownable{
         emit CampaignCreated(msg.sender, msg.value, campaignCounter);
 
         // refund excess creation fee
-        if(msg.value > CREATION_FEE){
+        if (msg.value > CREATION_FEE) {
             uint256 refund = msg.value - CREATION_FEE;
-          (bool sucess, ) =  payable(msg.sender).call{value: refund}('');
-          require(sucess, "Refund Failed");
+
+            (bool sucess, ) = payable(msg.sender).call{value: refund}("");
+
+            require(sucess, "Refund Failed");
         }
-    
     }
 
-    function isValidCampaign(address _campaign) external view returns(bool){
-        return isCampaign[_campaign];
+    // View functions
+
+    function getCampaignInfo(
+        uint256 _campaignId
+    ) external view returns (CampaignInfo memory) {
+        return campaignInfo[_campaignId];
     }
 
-    function verifyCampaign(address _campaign) external view returns (bool){
-        if(!isCampaign[_campaign]) return false;
-
-        Campaign campaign = Campaign(_campaign);
-
-        return campaign.getFactory() == address(this);
+    function getAllCampaigns() external view returns (address[] memory) {
+        return s_campaigns;
     }
 
+    // function isValidCampaign(address _campaign) external view returns (bool) {
+    //     return isCampaign[_campaign];
+    // }
+
+    // function verifyCampaign(address _campaign) external view returns (bool) {
+    //     if (!isCampaign[_campaign]) return false;
+
+    //     Campaign campaign = Campaign(_campaign);
+
+    //     return campaign.getFactory() == address(this);
+    // }
 
     // function setCreationFee(uint256 _amount) external onlyOwner{
     //     if(_amount == 0) revert InsufficientFee();
@@ -100,6 +124,4 @@ contract CrowdFundingFactory is Ownable{
 
     //     creation_fee = amoutInwei;
     // }
-
-
 }

@@ -12,32 +12,32 @@
 			},
 			{
 				"inputs": [],
-				"name": "DeadLineToFar",
+				"name": "CrowdFundingFactory__DeadLineToFar",
 				"type": "error"
 			},
 			{
 				"inputs": [],
-				"name": "DeadLineTooClose",
+				"name": "CrowdFundingFactory__DeadLineTooClose",
 				"type": "error"
 			},
 			{
 				"inputs": [],
-				"name": "InsufficientFee",
+				"name": "CrowdFundingFactory__InsufficientFee",
 				"type": "error"
 			},
 			{
 				"inputs": [],
-				"name": "InvalidDeadLine",
+				"name": "CrowdFundingFactory__InvalidDeadLine",
 				"type": "error"
 			},
 			{
 				"inputs": [],
-				"name": "InvalidGoal",
+				"name": "CrowdFundingFactory__InvalidGoal",
 				"type": "error"
 			},
 			{
 				"inputs": [],
-				"name": "LessThanMinimumGoal",
+				"name": "CrowdFundingFactory__LessThanMinimumGoal",
 				"type": "error"
 			},
 			{
@@ -107,85 +107,6 @@
 				"type": "event"
 			},
 			{
-				"inputs": [],
-				"name": "CREATION_FEE",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "MINIMUM_USD",
-				"outputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"name": "campaignInfo",
-				"outputs": [
-					{
-						"internalType": "address",
-						"name": "campaignAddress",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "creator",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256",
-						"name": "goal",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "createdAt",
-						"type": "uint256"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "",
-						"type": "uint256"
-					}
-				],
-				"name": "campaigns",
-				"outputs": [
-					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
 				"inputs": [
 					{
 						"internalType": "uint256",
@@ -204,19 +125,54 @@
 				"type": "function"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "_campaign",
-						"type": "address"
-					}
-				],
-				"name": "isValidCampaign",
+				"inputs": [],
+				"name": "getAllCampaigns",
 				"outputs": [
 					{
-						"internalType": "bool",
+						"internalType": "address[]",
 						"name": "",
-						"type": "bool"
+						"type": "address[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_campaignId",
+						"type": "uint256"
+					}
+				],
+				"name": "getCampaignInfo",
+				"outputs": [
+					{
+						"components": [
+							{
+								"internalType": "address",
+								"name": "campaignAddress",
+								"type": "address"
+							},
+							{
+								"internalType": "address",
+								"name": "creator",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "goal",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "createdAt",
+								"type": "uint256"
+							}
+						],
+						"internalType": "struct CrowdFundingFactory.CampaignInfo",
+						"name": "",
+						"type": "tuple"
 					}
 				],
 				"stateMutability": "view",
@@ -253,25 +209,6 @@
 				"name": "transferOwnership",
 				"outputs": [],
 				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "_campaign",
-						"type": "address"
-					}
-				],
-				"name": "verifyCampaign",
-				"outputs": [
-					{
-						"internalType": "bool",
-						"name": "",
-						"type": "bool"
-					}
-				],
-				"stateMutability": "view",
 				"type": "function"
 			}
 		],
@@ -341,19 +278,27 @@
 			]
 		},
 		"src/Campaign.sol": {
-			"keccak256": "0x9697ab988f54853e2812d2fc947e61cb03933c1c97bb9c2d201f7e442cacd4a3",
+			"keccak256": "0x92e1936bea3630004ae457247bced0724e6e98a7cfe6370fcc8bbd374ba6bbd8",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://814ecee9462e8f8af254241f658bf8144d5b4412467ad3f869d516b34fac2088",
-				"dweb:/ipfs/QmeaJPBSn2NpbCSn1DURoGEDihovYq5UFKjR3acNmaGfAX"
+				"bzz-raw://703316def61e1cfb9fd81da96a80341d658840e8eb1d14dcb5acfe4f41996fa1",
+				"dweb:/ipfs/QmUQ25qKFUdtFXXm6qDNeFRhEU3abQLqyn15Eg8tQSWaUr"
+			]
+		},
+		"src/CampaignFactory.sol": {
+			"keccak256": "0x794711b798287a9f76dd5e4e463c926ae5f0deb2d2c0cde4ea2ad86323fa5adc",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3cdb9038e1cceef06eec4c1b643887fb59565b79a22b811df4a3e840292081a0",
+				"dweb:/ipfs/QmRt5K8AQGL1FWBKTWbeLYJtN2KzcCGbYEqnxhBKpUCu3y"
 			]
 		},
 		"src/CrowdFundingFactory.sol": {
-			"keccak256": "0xa4455a3b466142243b120e742827581b1472f611b872426d0c43e379bb5c9246",
+			"keccak256": "0xe25a85b879df637074c69bfc279220d66e61073687e64085d857703ba4d5d5f6",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://d65e795166b23d5eafc678452bcc2e2e6df29c6972d564394e75b3a19e108d8d",
-				"dweb:/ipfs/QmcHhK9JSNMTvfXpNGKuhre6VUT2qq3ARELKWo1fm73Aex"
+				"bzz-raw://8063d4e31fcbeac1c56b68146e7399705fab81660f89370bc283ce536eabb383",
+				"dweb:/ipfs/QmXaerrHgS5LQ3akRJ9D5LFpLNe3WaP6VGKRkVVcM6M3MT"
 			]
 		},
 		"src/UnitConverter.sol": {
@@ -365,11 +310,11 @@
 			]
 		},
 		"src/error.sol": {
-			"keccak256": "0x47deb73216ec6ae1fb6e58cdd67e7560cc37bd2adf10e4ce0f1d42c532ad6e96",
+			"keccak256": "0xa25aa3d24517e9ec2b06bd8591299ad739d3f251028b7c472dcfbf2f7dc52361",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://3fe7789c83f04ce96863467f56d59223f526c6d0c1f49f23a156af4567cb814c",
-				"dweb:/ipfs/Qmdne6fUN7wsseeFss1CaxE2rSRGj6xZXunzXC5FgHJTNf"
+				"bzz-raw://1e83b8e6f027983ec81989288542cb3f174238c1701318eeb99137b0ccd16be5",
+				"dweb:/ipfs/QmWW7EdFdyT6JTQDDcQTnpG8KGQ79yQZhUqt9GvfGtbCkR"
 			]
 		}
 	},
