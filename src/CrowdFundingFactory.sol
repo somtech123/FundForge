@@ -10,19 +10,18 @@ contract CrowdFundingFactory is Ownable {
     struct CampaignInfo {
         address campaignAddress;
         address creator;
-        uint256 goal;
         uint256 createdAt;
+        uint256 goal;
     }
 
     uint256 private s_campaignCounter;
 
     uint256 private constant MINIMUM_USD = 1e16;
     uint256 private constant CREATION_FEE = 0.010 ether;
-
     address[] private s_campaigns;
 
-    mapping(uint256 => CampaignInfo) private campaignInfo;
-    mapping(address => bool) internal isCampaign;
+    mapping(uint256 => CampaignInfo) private s_campaignInfo;
+    mapping(address => bool) internal s_isCampaign;
 
     event CampaignCreated(
         address indexed creator,
@@ -40,7 +39,8 @@ contract CrowdFundingFactory is Ownable {
     constructor() Ownable(msg.sender) {}
 
     function createCampaign(uint256 _goal, uint256 _deadine) external payable {
-        uint256 durationInDays = _deadine * 1 days;
+        address sender = msg.sender;
+        uint256 value = msg.value;
 
         uint256 campaignCounter = s_campaignCounter;
 
@@ -48,6 +48,8 @@ contract CrowdFundingFactory is Ownable {
 
         if (_goal < MINIMUM_USD)
             revert CrowdFundingFactory__LessThanMinimumGoal();
+
+        uint256 durationInDays = _deadine * 1 days;
 
         if (durationInDays == 0) revert CrowdFundingFactory__InvalidDeadLine();
 
@@ -57,50 +59,54 @@ contract CrowdFundingFactory is Ownable {
         if (durationInDays >= 365 days)
             revert CrowdFundingFactory__DeadLineToFar();
 
-        if (msg.value < CREATION_FEE)
-            revert CrowdFundingFactory__InsufficientFee();
+        if (value < CREATION_FEE) revert CrowdFundingFactory__InsufficientFee();
 
         uint256 goal = UnitConverter.toWei(_goal);
 
         Campaign _campaign = new Campaign(
-            msg.sender,
+            sender,
             goal,
             block.timestamp + durationInDays
         );
 
         s_campaigns.push(address(_campaign));
+        address campaignAddr = address(_campaign);
 
-        campaignInfo[campaignCounter] = CampaignInfo({
-            campaignAddress: address(_campaign),
-            creator: msg.sender,
-            goal: goal,
-            createdAt: block.timestamp
+        s_campaignInfo[campaignCounter] = CampaignInfo({
+            campaignAddress: campaignAddr,
+            creator: sender,
+            createdAt: block.timestamp,
+            goal: goal
         });
 
-        isCampaign[address(_campaign)] = true;
+        s_isCampaign[address(_campaign)] = true;
 
-        campaignCounter++;
+        unchecked {
+            ++campaignCounter;
+        }
 
         s_campaignCounter = campaignCounter;
 
-        emit CampaignCreated(msg.sender, msg.value, campaignCounter);
+        emit CampaignCreated(sender, value, campaignCounter);
 
         // refund excess creation fee
-        if (msg.value > CREATION_FEE) {
-            uint256 refund = msg.value - CREATION_FEE;
-
-            (bool sucess, ) = payable(msg.sender).call{value: refund}("");
-
-            require(sucess, "Refund Failed");
+        if (value > CREATION_FEE) {
+            unchecked {
+                uint256 refund = value - CREATION_FEE;
+                (bool sucess, ) = payable(sender).call{value: refund}("");
+                require(sucess, "Refund Failed");
+            }
         }
     }
 
-    // View functions
+    //=======================================================
+    //        View functions
+    //=======================================================
 
     function getCampaignInfo(
         uint256 _campaignId
     ) external view returns (CampaignInfo memory) {
-        return campaignInfo[_campaignId];
+        return s_campaignInfo[_campaignId];
     }
 
     function getAllCampaigns() external view returns (address[] memory) {
@@ -112,18 +118,10 @@ contract CrowdFundingFactory is Ownable {
     }
 
     function getCampaign(uint256 _id) external view returns (address) {
-        return campaignInfo[_id].campaignAddress;
+        return s_campaignInfo[_id].campaignAddress;
     }
 
     function isValidCampaign(address _campaign) external view returns (bool) {
-        return isCampaign[_campaign];
+        return s_isCampaign[_campaign];
     }
-
-    // function verifyCampaign(address _campaign) external view returns (bool) {
-    //     if (!isCampaign[_campaign]) return false;
-
-    //     Campaign campaign = Campaign(_campaign);
-
-    //     return campaign.getFactory() == address(this);
-    // }
 }
