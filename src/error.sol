@@ -11,3 +11,5 @@ error LessThanMinimumGoal();
 error MaxCampaignLimit();
 
 error InsufficientFee();
+error NotValidCampaign();
+error NotFactory();
