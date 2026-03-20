@@ -18,3 +18,4 @@ lcov.info
 coverage/
 .deps/
 .vscode/
+.states/
