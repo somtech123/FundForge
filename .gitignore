@@ -16,3 +16,5 @@ lib/
 broadcast/
 lcov.info
 coverage/
+.deps/
+.vscode/
