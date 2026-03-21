@@ -17,7 +17,7 @@ contract Campaign is Ownable {
     address creator;
     uint256 goal;
     uint256 deadline;
-    uint256 totalMilestoneTarget;
+    uint256 public totalMilestoneTarget;
     uint256 totalFunded;
 
     Milestone[] public milestones;
@@ -95,16 +95,16 @@ contract Campaign is Ownable {
         if (bytes(_description).length == 0)
             revert Campaign__InvalidMilestoneDescription();
 
-        if (totalFunded > 0) revert Campaign__AlreadyFunded();
+        // if (totalFunded > 0) revert Campaign__AlreadyFunded();
 
         bytes32 mileStoneHash = keccak256(
             abi.encode(_description, _targetAmount)
         );
         if (milestoneExists[mileStoneHash])
             revert Campaign__DuplicateMilestone();
+            
 
-        if (totalMilestoneTarget + _targetAmount > goal)
-            revert Campaign__MilestoneExceedGoal();
+        if (totalMilestoneTarget + _targetAmount > goal) revert Campaign__MilestoneExceedGoal();
 
         milestoneExists[mileStoneHash] = true;
         totalMilestoneTarget += _targetAmount;
@@ -117,7 +117,7 @@ contract Campaign is Ownable {
                 paid: false
             })
         );
-        emit MilestoneAdded(address(this), _description, _targetAmount);
+        emit MilestoneAdded(msg.sender, _description, _targetAmount);
     }
 
     function getGoal() external view returns (uint256) {
@@ -126,5 +126,8 @@ contract Campaign is Ownable {
 
     function getDeadline() external view returns (uint256) {
         return deadline;
+    }
+    function getTotalMileStoneLength() external view returns (uint256){
+        return milestones.length;
     }
 }

@@ -39,8 +39,9 @@ contract CampaignTest is Test {
     }
 
     modifier asCreator() {
-        vm.prank(USER);
+        vm.startPrank(USER);
         _;
+        vm.stopPrank(); 
         
     }
 
@@ -109,6 +110,100 @@ contract CampaignTest is Test {
         vm.stopPrank(); 
 
     }
+
+    function testCampaignAddMilestoneWithZeroAmount() public asCreator{
+
+        vm.expectRevert(Campaign.Campaign__ZeroMilestoneTarget.selector);
+
+        campaign.addMilestone(VALID_DESC, 0);
+
+    }
+
+    function testCampaignAddMilestoneWithEmptyDesc() public asCreator{
+        vm.expectRevert(Campaign.Campaign__InvalidMilestoneDescription.selector);
+
+        campaign.addMilestone('', VALID_TARGET);
+        
+    }
+
+    function testCampaignAddUniqueMilestone() public asCreator{
+        campaign.addMilestone(VALID_DESC, VALID_TARGET);
+
+        bytes32 _hash =keccak256(abi.encode(VALID_DESC, VALID_TARGET));
+
+        assertTrue(campaign.milestoneExists(_hash));
+
+    }
+
+    function testCampaignAddDuplicateMilestone() public {
+        vm.startPrank(USER);
+
+        campaign.addMilestone(VALID_DESC, VALID_TARGET);
+
+        vm.expectRevert(Campaign.Campaign__DuplicateMilestone.selector);
+
+        campaign.addMilestone(VALID_DESC, VALID_TARGET);
+
+        vm.stopPrank(); 
+
+    }
+
+    function testCampaignTargetMustNotExceedGoal() public  asCreator{
+        campaign.addMilestone(VALID_DESC, VALID_TARGET);
+
+        uint256 amount = campaign.totalMilestoneTarget() + VALID_TARGET;
+
+        assertGt(campaign.getGoal(), amount);
+    }
+
+    function testCampaignAddMilestoneTarget() public asCreator {
+      
+         uint256 target = campaign.getGoal() + 1e10;
+       
+        vm.expectRevert(Campaign.Campaign__MilestoneExceedGoal.selector);
+        
+        campaign.addMilestone(VALID_DESC, target);
+    }
+
+    function testCampaignMilestoneTargetIncrement() public asCreator{
+
+        uint256 beforeTarget = campaign.totalMilestoneTarget();
+
+        campaign.addMilestone(VALID_DESC, VALID_TARGET);
+        uint256 afterTarget = campaign.totalMilestoneTarget();
+
+        vm.assertGt(afterTarget, beforeTarget);
+
+    }
+
+    function testCampaignMilestoneAddedProperly() public asCreator{
+
+        campaign.addMilestone(VALID_DESC, VALID_TARGET);
+
+        assertEq(campaign.getTotalMileStoneLength(), 1);
+
+        (string memory description,
+        uint256 amount,
+        bool completed,
+        bool paid) = campaign.milestones(0);
+
+        assertEq(description, VALID_DESC);
+        assertEq(amount, VALID_TARGET);
+        assertEq(completed, false);
+        assertEq(paid, false);
+    }
+
+    function testCampaignAddMilestoneEmitEventProperly() public asCreator{
+        vm.expectEmit(true, false, false, true);
+
+        emit Campaign.MilestoneAdded(USER,VALID_DESC, VALID_TARGET);
+
+        campaign.addMilestone(VALID_DESC, VALID_TARGET);
+    }
+
+
+
+    
 
   
 }
