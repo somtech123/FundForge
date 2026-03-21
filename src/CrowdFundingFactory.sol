@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+// import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./Campaign.sol";
 import "./UnitConverter.sol";
 // import "./error.sol";
 
-contract CrowdFundingFactory is Ownable {
+contract CrowdFundingFactory {
     struct CampaignInfo {
         address campaignAddress;
         address creator;
         uint256 createdAt;
         uint256 goal;
+        bool active;
     }
 
     uint256 private s_campaignCounter;
@@ -21,7 +22,9 @@ contract CrowdFundingFactory is Ownable {
     address[] private s_campaigns;
 
     mapping(uint256 => CampaignInfo) private s_campaignInfo;
+    mapping(address => CampaignInfo) private s_campaign;
     mapping(address => bool) internal s_isCampaign;
+    mapping(address => address) private s_campaignFactory;
 
     event CampaignCreated(
         address indexed creator,
@@ -36,9 +39,12 @@ contract CrowdFundingFactory is Ownable {
     error CrowdFundingFactory__DeadLineTooClose();
     error CrowdFundingFactory__InsufficientFee();
 
-    constructor() Ownable(msg.sender) {}
+    constructor() {}
 
-    function createCampaign(uint256 _goal, uint256 _deadine) external payable {
+    function createCampaign(
+        uint256 _goal,
+        uint256 _deadine
+    ) external payable returns (address) {
         address sender = msg.sender;
         uint256 value = msg.value;
 
@@ -65,21 +71,34 @@ contract CrowdFundingFactory is Ownable {
 
         Campaign _campaign = new Campaign(
             sender,
+            address(this),
             goal,
             block.timestamp + durationInDays
         );
 
-        s_campaigns.push(address(_campaign));
         address campaignAddr = address(_campaign);
+        s_campaigns.push(address(_campaign));
 
         s_campaignInfo[campaignCounter] = CampaignInfo({
             campaignAddress: campaignAddr,
             creator: sender,
             createdAt: block.timestamp,
-            goal: goal
+            goal: goal,
+            active: true
         });
 
+        s_campaign[campaignAddr] = CampaignInfo({
+            campaignAddress: campaignAddr,
+            creator: sender,
+            createdAt: block.timestamp,
+            goal: goal,
+            active: true
+        });
+
+        // whitelist
+
         s_isCampaign[address(_campaign)] = true;
+        s_campaignFactory[campaignAddr] = address(this);
 
         unchecked {
             ++campaignCounter;
@@ -97,6 +116,8 @@ contract CrowdFundingFactory is Ownable {
                 require(sucess, "Refund Failed");
             }
         }
+
+        return address(_campaign);
     }
 
     //=======================================================
@@ -123,5 +144,15 @@ contract CrowdFundingFactory is Ownable {
 
     function isValidCampaign(address _campaign) external view returns (bool) {
         return s_isCampaign[_campaign];
+    }
+
+    function getCampaignByAddress(
+        address _campaign
+    ) external view returns (CampaignInfo memory) {
+        return s_campaign[_campaign];
+    }
+
+    function getFactoryOf(address _campaign) external view returns (address) {
+        return s_campaignFactory[_campaign];
     }
 }
