@@ -13,16 +13,25 @@ contract Campaign is Ownable {
         bool completed;
         bool paid;
     }
+
+    struct CampaignState{
+        uint256 totalFunded;
+        bool withdraw;
+        mapping (address => uint256) contributors;
+    }
+
     address public immutable I_FACTORY;
     address creator;
     uint256 goal;
     uint256 deadline;
     uint256 public totalMilestoneTarget;
     uint256 totalFunded;
+    bool private s_funded;
 
     Milestone[] public milestones;
 
     mapping(bytes32 => bool) public milestoneExists;
+    mapping(address => CampaignState) private s_campaignState;
 
     error Campaign__NotOwner();
     error Campaign__NotCampaign();
@@ -36,12 +45,18 @@ contract Campaign is Ownable {
     error Campaign__AlreadyFunded();
     error Campaign__DuplicateMilestone();
     error Campaign__MilestoneExceedGoal();
+    error Campaign__ZeroAmount();
+    error Campaign__MilestoneTargetNotEqualCampaignGoal();
+    error Campaign__CampaignDeadlinePassed();
+    error Campaign__CampaignGoalReached();
 
     event MilestoneAdded(
         address indexed campaignAddress,
         string description,
         uint256 targetAmount
     );
+
+    event CampaignFunded(address indexed sender, uint256 amount);
 
     //============================
     //       Modifiers
@@ -87,6 +102,12 @@ contract Campaign is Ownable {
         I_FACTORY = _factory;
     }
 
+    //==========================================
+    //    Milestone
+    //============================================
+
+    //====================Add Milestone=================================
+
     function addMilestone(
         string calldata _description,
         uint256 _targetAmount
@@ -119,6 +140,67 @@ contract Campaign is Ownable {
         );
         emit MilestoneAdded(msg.sender, _description, _targetAmount);
     }
+
+    //==========================================
+    //    Funding
+    //============================================
+
+    //=====================Fund Campaign====================
+
+    function fundCampaign() external payable onlyValidCampaign{
+        if(msg.value == 0) revert Campaign__ZeroAmount();
+
+        if(totalMilestoneTarget != goal) revert Campaign__MilestoneTargetNotEqualCampaignGoal();
+
+        if(s_funded)revert Campaign__CampaignGoalReached();
+
+        uint256 deadline = getCampaignInfo().deadline;
+        if(block.timestamp >= deadline) revert Campaign__CampaignDeadlinePassed();
+
+        CampaignState storage state = s_campaignState[address(this)];
+        uint256 totalFunded = state.totalFunded;
+
+        uint256 target = goal - totalFunded;
+        uint256 accepted;
+        uint256 refund;
+        
+        // handle overfunding
+        if(msg.value > target){
+            accepted = target;
+            refund = msg.value - target;
+        }else {
+            accepted = msg.value;
+        }
+
+        uint256 newTotal = currentTotal + accepted;
+
+        state.contributors[msg.sender] += accepted;
+        state.totalFunded = newTotal;
+
+        if(totalFunded == goal){
+            s_funded = true;
+        }
+        emit CampaignFunded(msg.sender, accepted);
+
+        if(refund > 0){
+            (bool success, ) = msg.sender.call{value: refund}('');
+            require(success, "refunf failed");
+        }    
+
+    }
+
+    
+
+    function getCampaignInfo() public view returns(CampaignInfo memory){
+        CrowdFundingFactory.CampaignInfo memory info = CrowdFundingFactory(
+            I_FACTORY
+        ).getCampaignByAddress(address(this));
+
+        return info;
+
+    }
+
+
 
     function getGoal() external view returns (uint256) {
         return goal;

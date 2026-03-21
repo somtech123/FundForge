@@ -13,6 +13,7 @@ contract CrowdFundingFactory {
         uint256 createdAt;
         uint256 goal;
         bool active;
+        uint256 deadline;
     }
 
     uint256 private s_campaignCounter;
@@ -84,7 +85,8 @@ contract CrowdFundingFactory {
             creator: sender,
             createdAt: block.timestamp,
             goal: goal,
-            active: true
+            active: true,
+            deadline: block.timestamp + durationInDays
         });
 
         s_campaign[campaignAddr] = CampaignInfo({
@@ -92,7 +94,8 @@ contract CrowdFundingFactory {
             creator: sender,
             createdAt: block.timestamp,
             goal: goal,
-            active: true
+            active: true,
+            deadline: block.timestamp + durationInDays
         });
 
         // whitelist
