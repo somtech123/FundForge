@@ -11,9 +11,9 @@ contract CrowdFundingFactoryTest is Test {
 
     uint256 constant MIN_FEE = 0.010 ether;
     uint256 constant STARTING_BALANCE = 10 ether;
-    uint256 private constant MINIMUM_USD = 1e16;
+    uint256 private  MINIMUM_USD = 2;
 
-    uint256 private constant VALID_GOAL = 1e18;
+    uint256 private constant VALID_GOAL = 6 ;
     uint256 private constant VALID_DURATION = 55;
 
     function setUp() public {
@@ -52,7 +52,7 @@ contract CrowdFundingFactoryTest is Test {
                 .selector
         );
 
-        factory.createCampaign{value: MIN_FEE}(1e15, 30);
+        factory.createCampaign{value: MIN_FEE}(1, 30);
     }
     // Test — goal below minimum duration
     function testCreateCampaignForInvalidDeadline() public asUser {

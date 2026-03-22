@@ -18,7 +18,7 @@ contract CrowdFundingFactory {
 
     uint256 private s_campaignCounter;
 
-    uint256 private constant MINIMUM_USD = 1e16;
+    uint256 private s_minimum_eth = 2;
     uint256 private constant CREATION_FEE = 0.010 ether;
     address[] private s_campaigns;
 
@@ -50,10 +50,12 @@ contract CrowdFundingFactory {
         uint256 value = msg.value;
 
         uint256 campaignCounter = s_campaignCounter;
+        uint256 min_eth = UnitConverter.toWei(s_minimum_eth);
+        uint256 goal = UnitConverter.toWei(_goal);
 
-        if (_goal == 0) revert CrowdFundingFactory__InvalidGoal();
+        if (goal == 0) revert CrowdFundingFactory__InvalidGoal();
 
-        if (_goal < MINIMUM_USD)
+        if (goal < min_eth)
             revert CrowdFundingFactory__LessThanMinimumGoal();
 
         uint256 durationInDays = _deadine * 1 days;
@@ -68,7 +70,7 @@ contract CrowdFundingFactory {
 
         if (value < CREATION_FEE) revert CrowdFundingFactory__InsufficientFee();
 
-        uint256 goal = UnitConverter.toWei(_goal);
+        
 
         Campaign _campaign = new Campaign(
             sender,

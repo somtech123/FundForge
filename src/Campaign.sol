@@ -5,6 +5,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./error.sol";
 import {CrowdFundingFactory} from "./CrowdFundingFactory.sol";
+import "./UnitConverter.sol";
 
 contract Campaign is Ownable {
     struct Milestone {
@@ -25,7 +26,7 @@ contract Campaign is Ownable {
     uint256 goal;
     uint256 deadline;
     uint256 public totalMilestoneTarget;
-    uint256 totalFunded;
+    // uint256 totalFunded;
     bool private s_funded;
 
     Milestone[] public milestones;
@@ -110,8 +111,10 @@ contract Campaign is Ownable {
 
     function addMilestone(
         string calldata _description,
-        uint256 _targetAmount
+        uint256 _goal
     ) external onlyCreator onlyValidCampaign {
+         uint256 _targetAmount = UnitConverter.toWei(_goal);
+
         if (_targetAmount == 0) revert Campaign__ZeroMilestoneTarget();
         if (bytes(_description).length == 0)
             revert Campaign__InvalidMilestoneDescription();
@@ -148,14 +151,17 @@ contract Campaign is Ownable {
     //=====================Fund Campaign====================
 
     function fundCampaign() external payable onlyValidCampaign{
-        if(msg.value == 0) revert Campaign__ZeroAmount();
+        uint256 _sentValue =  msg.value; 
+        //  UnitConverter.toWei(msg.value);
+
+        if(_sentValue == 0) revert Campaign__ZeroAmount();
 
         if(totalMilestoneTarget != goal) revert Campaign__MilestoneTargetNotEqualCampaignGoal();
 
         if(s_funded)revert Campaign__CampaignGoalReached();
 
-        uint256 deadline = getCampaignInfo().deadline;
-        if(block.timestamp >= deadline) revert Campaign__CampaignDeadlinePassed();
+        uint256 _deadline = getCampaignInfo().deadline;
+        if(block.timestamp >= _deadline) revert Campaign__CampaignDeadlinePassed();
 
         CampaignState storage state = s_campaignState[address(this)];
         uint256 totalFunded = state.totalFunded;
@@ -165,19 +171,19 @@ contract Campaign is Ownable {
         uint256 refund;
         
         // handle overfunding
-        if(msg.value > target){
+        if(_sentValue > target){
             accepted = target;
-            refund = msg.value - target;
+            refund = _sentValue - target;
         }else {
-            accepted = msg.value;
+            accepted = _sentValue;
         }
 
-        uint256 newTotal = currentTotal + accepted;
+        uint256 newTotal = totalFunded + accepted;
 
         state.contributors[msg.sender] += accepted;
         state.totalFunded = newTotal;
 
-        if(totalFunded == goal){
+        if(newTotal == goal){
             s_funded = true;
         }
         emit CampaignFunded(msg.sender, accepted);
@@ -188,10 +194,26 @@ contract Campaign is Ownable {
         }    
 
     }
+    function getStatus() public view returns (bool){
+        return s_funded;
+    }
+
+    function getTotalFunded() public view returns(uint256){
+        CampaignState storage state = s_campaignState[address(this)];
+        uint256 amt = state.totalFunded;
+        return amt;
+    }
+
+    function getContributors(address _address) public view returns(uint256){
+        CampaignState storage state = s_campaignState[address(this)];
+        uint256 fund = state.contributors[_address];
+        return fund;
+
+    }
 
     
 
-    function getCampaignInfo() public view returns(CampaignInfo memory){
+    function getCampaignInfo() public view returns(CrowdFundingFactory.CampaignInfo memory){
         CrowdFundingFactory.CampaignInfo memory info = CrowdFundingFactory(
             I_FACTORY
         ).getCampaignByAddress(address(this));
@@ -212,4 +234,6 @@ contract Campaign is Ownable {
     function getTotalMileStoneLength() external view returns (uint256){
         return milestones.length;
     }
+
+    // function isFunded() external view 
 }
