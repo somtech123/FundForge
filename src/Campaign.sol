@@ -5,9 +5,13 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./error.sol";
 import {CrowdFundingFactory} from "./CrowdFundingFactory.sol";
+
+import {CrowdFundingFactoryLibary} from "./libary/CrowdFundingLiary.sol";
 import "./UnitConverter.sol";
 
+
 contract Campaign is Ownable {
+
     struct Milestone {
         string description;
         uint256 amount;
@@ -22,11 +26,11 @@ contract Campaign is Ownable {
     }
 
     address public immutable I_FACTORY;
-    address creator;
-    uint256 goal;
-    uint256 deadline;
+    address private s_creator;
+    uint256 private  s_goal;
+    uint256 private s_deadline;
+
     uint256 public totalMilestoneTarget;
-    // uint256 totalFunded;
     bool private s_funded;
 
     Milestone[] public milestones;
@@ -65,7 +69,6 @@ contract Campaign is Ownable {
 
     modifier onlyCreator() {
         if (msg.sender != owner()) revert Campaign__NotOwner();
-
         _;
     }
 
@@ -77,16 +80,11 @@ contract Campaign is Ownable {
         if (!CrowdFundingFactory(I_FACTORY).isValidCampaign(_campaignAddress))
             revert Campaign__InValidCampaign();
 
-        CrowdFundingFactory.CampaignInfo memory info = CrowdFundingFactory(
+        CrowdFundingFactoryLibary.CampaignInfo memory info = CrowdFundingFactory(
             I_FACTORY
         ).getCampaignByAddress(_campaignAddress);
+
         if (!info.active) revert Campaign__NotActiveCampaign();
-
-        // if (
-        //     CrowdFundingFactory(I_FACTORY).getFactoryOf(_campaignAddress) !=
-        //     I_FACTORY
-        // ) revert Campaign__FactoryMismatch();
-
         _;
     }
 
@@ -98,8 +96,8 @@ contract Campaign is Ownable {
     ) Ownable(_creator) {
         if (_factory == address(0)) revert Campaign__ZeroAddress();
 
-        goal = _goal;
-        deadline = _deadine;
+        s_goal = _goal;
+        s_deadline = _deadine;
         I_FACTORY = _factory;
     }
 
@@ -128,7 +126,7 @@ contract Campaign is Ownable {
             revert Campaign__DuplicateMilestone();
             
 
-        if (totalMilestoneTarget + _targetAmount > goal) revert Campaign__MilestoneExceedGoal();
+        if (totalMilestoneTarget + _targetAmount > s_goal) revert Campaign__MilestoneExceedGoal();
 
         milestoneExists[mileStoneHash] = true;
         totalMilestoneTarget += _targetAmount;
@@ -141,6 +139,7 @@ contract Campaign is Ownable {
                 paid: false
             })
         );
+
         emit MilestoneAdded(msg.sender, _description, _targetAmount);
     }
 
@@ -150,13 +149,14 @@ contract Campaign is Ownable {
 
     //=====================Fund Campaign====================
 
-    function fundCampaign() external payable onlyValidCampaign{
+    function fundCampaign() external payable onlyValidCampaign {
+
         uint256 _sentValue =  msg.value; 
         //  UnitConverter.toWei(msg.value);
 
         if(_sentValue == 0) revert Campaign__ZeroAmount();
 
-        if(totalMilestoneTarget != goal) revert Campaign__MilestoneTargetNotEqualCampaignGoal();
+        if(totalMilestoneTarget != s_goal) revert Campaign__MilestoneTargetNotEqualCampaignGoal();
 
         if(s_funded)revert Campaign__CampaignGoalReached();
 
@@ -166,7 +166,7 @@ contract Campaign is Ownable {
         CampaignState storage state = s_campaignState[address(this)];
         uint256 totalFunded = state.totalFunded;
 
-        uint256 target = goal - totalFunded;
+        uint256 target = s_goal - totalFunded;
         uint256 accepted;
         uint256 refund;
         
@@ -183,7 +183,7 @@ contract Campaign is Ownable {
         state.contributors[msg.sender] += accepted;
         state.totalFunded = newTotal;
 
-        if(newTotal == goal){
+        if(newTotal == s_goal){
             s_funded = true;
         }
         emit CampaignFunded(msg.sender, accepted);
@@ -194,6 +194,8 @@ contract Campaign is Ownable {
         }    
 
     }
+
+    
     function getStatus() public view returns (bool){
         return s_funded;
     }
@@ -213,8 +215,8 @@ contract Campaign is Ownable {
 
     
 
-    function getCampaignInfo() public view returns(CrowdFundingFactory.CampaignInfo memory){
-        CrowdFundingFactory.CampaignInfo memory info = CrowdFundingFactory(
+    function getCampaignInfo() public view returns(CrowdFundingFactoryLibary.CampaignInfo memory){
+        CrowdFundingFactoryLibary.CampaignInfo memory info = CrowdFundingFactory(
             I_FACTORY
         ).getCampaignByAddress(address(this));
 
@@ -225,11 +227,11 @@ contract Campaign is Ownable {
 
 
     function getGoal() external view returns (uint256) {
-        return goal;
+        return s_goal;
     }
 
     function getDeadline() external view returns (uint256) {
-        return deadline;
+        return s_deadline;
     }
     function getTotalMileStoneLength() external view returns (uint256){
         return milestones.length;

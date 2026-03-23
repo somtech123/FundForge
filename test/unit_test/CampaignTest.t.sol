@@ -5,6 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {console} from "forge-std/console.sol";
 import {Campaign} from "../../src/Campaign.sol";
 import {CrowdFundingFactory} from "../../src/CrowdFundingFactory.sol";
+import {CrowdFundingFactoryLibary} from  "../../src/libary/CrowdFundingLiary.sol";
 
 contract CampaignTest is Test {
     Campaign campaign;
@@ -14,7 +15,8 @@ contract CampaignTest is Test {
     address ANOTHER_USER = makeAddr("another_user");
     address ATTACKER = makeAddr("attacker");
 
-    uint256 constant MIN_FEE = 0.010 ether;
+   
+    uint256 constant MIN_FEE = 1000000000000000;
     uint256 constant STARTING_BALANCE = 10 ether;
 
     uint256 private constant VALID_GOAL = 6;
@@ -87,7 +89,7 @@ contract CampaignTest is Test {
     }
 
     function testCampaignIsActive() public view {
-        CrowdFundingFactory.CampaignInfo memory info = factory.getCampaignByAddress(address(campaign));
+        CrowdFundingFactoryLibary.CampaignInfo memory info = factory.getCampaignByAddress(address(campaign));
         assertTrue(info.active);
     }
 

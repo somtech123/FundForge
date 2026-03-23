@@ -4,12 +4,13 @@ pragma solidity ^0.8.24;
 import {Test} from "forge-std/Test.sol";
 import {CrowdFundingFactory} from "../../src/CrowdFundingFactory.sol";
 import {MockRefundRejecter} from "../mock/MockRefundRejecter.sol";
+import {CrowdFundingFactoryLibary} from  "../../src/libary/CrowdFundingLiary.sol";
 
 contract CrowdFundingFactoryTest is Test {
     CrowdFundingFactory factory;
     address USER = makeAddr("user");
 
-    uint256 constant MIN_FEE = 0.010 ether;
+    uint256 constant MIN_FEE = 1000000000000000;
     uint256 constant STARTING_BALANCE = 10 ether;
     uint256 private  MINIMUM_USD = 2;
 
@@ -110,7 +111,7 @@ contract CrowdFundingFactoryTest is Test {
     function testCreateCampaignStoresCorrectInfo() public asUser {
         factory.createCampaign{value: MIN_FEE}(VALID_GOAL, VALID_DURATION);
 
-        CrowdFundingFactory.CampaignInfo memory info = factory.getCampaignInfo(
+        CrowdFundingFactoryLibary.CampaignInfo memory info = factory.getCampaignInfo(
             0
         );
 
@@ -179,7 +180,7 @@ contract CrowdFundingFactoryTest is Test {
     function testGetCampaignInfo() public asUser {
         factory.createCampaign{value: MIN_FEE}(VALID_GOAL, VALID_DURATION);
 
-        CrowdFundingFactory.CampaignInfo memory info = factory.getCampaignInfo(
+        CrowdFundingFactoryLibary.CampaignInfo memory info = factory.getCampaignInfo(
             0
         );
 

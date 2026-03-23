@@ -1,30 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
-// import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import "./Campaign.sol";
 import "./UnitConverter.sol";
+import {CrowdFundingFactoryLibary} from "./libary/CrowdFundingLiary.sol";
+
 // import "./error.sol";
 
 contract CrowdFundingFactory {
-    struct CampaignInfo {
-        address campaignAddress;
-        address creator;
-        uint256 createdAt;
-        uint256 goal;
-        bool active;
-        uint256 deadline;
-    }
+   
 
     uint256 private s_campaignCounter;
+    uint256 private s_minimumEth = 2;
+    uint256 private constant CREATION_FEE = 1000000000000000;
 
-    uint256 private s_minimum_eth = 2;
-    uint256 private constant CREATION_FEE = 0.010 ether;
     address[] private s_campaigns;
 
-    mapping(uint256 => CampaignInfo) private s_campaignInfo;
-    mapping(address => CampaignInfo) private s_campaign;
-    mapping(address => bool) internal s_isCampaign;
+    mapping(uint256 => CrowdFundingFactoryLibary.CampaignInfo) private s_campaignInfo;
+    mapping(address => CrowdFundingFactoryLibary.CampaignInfo) private s_campaign;
+    mapping(address => bool) private s_isCampaign;
     mapping(address => address) private s_campaignFactory;
 
     event CampaignCreated(
@@ -50,12 +44,12 @@ contract CrowdFundingFactory {
         uint256 value = msg.value;
 
         uint256 campaignCounter = s_campaignCounter;
-        uint256 min_eth = UnitConverter.toWei(s_minimum_eth);
+        uint256 minEth = UnitConverter.toWei(s_minimumEth);
         uint256 goal = UnitConverter.toWei(_goal);
 
         if (goal == 0) revert CrowdFundingFactory__InvalidGoal();
 
-        if (goal < min_eth)
+        if (goal < minEth)
             revert CrowdFundingFactory__LessThanMinimumGoal();
 
         uint256 durationInDays = _deadine * 1 days;
@@ -82,7 +76,7 @@ contract CrowdFundingFactory {
         address campaignAddr = address(_campaign);
         s_campaigns.push(address(_campaign));
 
-        s_campaignInfo[campaignCounter] = CampaignInfo({
+        s_campaignInfo[campaignCounter] = CrowdFundingFactoryLibary.CampaignInfo({
             campaignAddress: campaignAddr,
             creator: sender,
             createdAt: block.timestamp,
@@ -91,7 +85,7 @@ contract CrowdFundingFactory {
             deadline: block.timestamp + durationInDays
         });
 
-        s_campaign[campaignAddr] = CampaignInfo({
+        s_campaign[campaignAddr] = CrowdFundingFactoryLibary.CampaignInfo({
             campaignAddress: campaignAddr,
             creator: sender,
             createdAt: block.timestamp,
@@ -131,7 +125,7 @@ contract CrowdFundingFactory {
 
     function getCampaignInfo(
         uint256 _campaignId
-    ) external view returns (CampaignInfo memory) {
+    ) external view returns (CrowdFundingFactoryLibary.CampaignInfo memory) {
         return s_campaignInfo[_campaignId];
     }
 
@@ -153,7 +147,7 @@ contract CrowdFundingFactory {
 
     function getCampaignByAddress(
         address _campaign
-    ) external view returns (CampaignInfo memory) {
+    ) external view returns (CrowdFundingFactoryLibary.CampaignInfo memory) {
         return s_campaign[_campaign];
     }
 
