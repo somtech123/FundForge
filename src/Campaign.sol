@@ -23,6 +23,7 @@ contract Campaign is Ownable {
         uint256 totalFunded;
         bool withdraw;
         mapping (address => uint256) contributors;
+      
     }
 
     address public immutable I_FACTORY;
@@ -32,6 +33,7 @@ contract Campaign is Ownable {
 
     uint256 public totalMilestoneTarget;
     bool private s_funded;
+    bool private s_locked;
 
     Milestone[] public milestones;
 
@@ -54,6 +56,14 @@ contract Campaign is Ownable {
     error Campaign__MilestoneTargetNotEqualCampaignGoal();
     error Campaign__CampaignDeadlinePassed();
     error Campaign__CampaignGoalReached();
+    error Campaign__InvalidMilesToneIndex();
+    error Campaign__AlreayCompleted();
+    error Campaign__TotalMilesToneTargetNotMeet();
+    error Campaign_AlreadyPaidMilestone();
+    error Campaign_TransferFailed();
+    error Campaign__CampaignStillActive();
+    error Campaign__CampaignGoalMeet();
+    error Campaign__ZeroContribution();
 
     event MilestoneAdded(
         address indexed campaignAddress,
@@ -62,6 +72,10 @@ contract Campaign is Ownable {
     );
 
     event CampaignFunded(address indexed sender, uint256 amount);
+    event SubmitMilestone(address indexed sender, bool status);
+    event WithdrawMilestoneAmount(address indexed sender,  uint256 amount);
+    event RefundContributors(address indexed sender,  uint256 amount);
+
 
     //============================
     //       Modifiers
@@ -70,6 +84,15 @@ contract Campaign is Ownable {
     modifier onlyCreator() {
         if (msg.sender != owner()) revert Campaign__NotOwner();
         _;
+    }
+
+    modifier nonReentrant(){
+        require(!s_locked, 'Reentrant');
+        s_locked = true;
+
+        _;
+
+        s_locked = false;
     }
 
     modifier onlyValidCampaign() {
@@ -143,6 +166,23 @@ contract Campaign is Ownable {
         emit MilestoneAdded(msg.sender, _description, _targetAmount);
     }
 
+   
+
+
+    function submitMilestone(uint256 index) public onlyCreator {
+        if(index >= milestones.length) revert Campaign__InvalidMilesToneIndex();
+
+        if(totalMilestoneTarget != s_goal) revert Campaign__TotalMilesToneTargetNotMeet();
+
+        Milestone storage _milestone = milestones[index];
+        if(_milestone.completed == true) revert Campaign__AlreayCompleted();
+
+        _milestone.completed = true;
+
+        emit SubmitMilestone(msg.sender, _milestone.completed);
+
+    }
+
     //==========================================
     //    Funding
     //============================================
@@ -195,6 +235,52 @@ contract Campaign is Ownable {
 
     }
 
+    //==========================================
+    //    Withdrawal
+    //============================================
+
+    function withdraw(uint256 index) public  onlyCreator nonReentrant{
+
+        if(index >= milestones.length) revert Campaign__InvalidMilesToneIndex();
+
+        Milestone storage _milestone = milestones[index];
+        if(_milestone.completed == false) revert Campaign__AlreayCompleted();
+
+        if(_milestone.paid == true) revert Campaign_AlreadyPaidMilestone();
+
+        _milestone.paid  = true;
+
+        emit WithdrawMilestoneAmount(msg.sender, _milestone.amount);
+
+        (bool success, ) = payable(msg.sender).call{value: _milestone.amount}('');
+        
+        if(!success) revert Campaign_TransferFailed();
+        
+    }
+
+
+
+    function refund() public external payable onlyValidCampaign nonReentrant {
+        if(block.timestamp > s_deadline) revert Campaign__CampaignStillActive();
+
+        if(totalMilestoneTarget >= s_goal) revert Campaign__CampaignGoalMeet();
+
+        CampaignState storage _state = s_campaignState[address(this)];
+
+        uint256 amountContributed = _state.contributors[msg.sender];
+
+        if(amountContributed == 0) revert Campaign__ZeroContribution();
+
+        _state.contributors[msg.sender] = 0;
+
+        emit RefundContributors(msg.sender, amountContributed);
+
+        (bool success, ) = payable(msg.sender).call{value: amountContributed}('');
+        
+        if(!success) revert Campaign_TransferFailed();  
+
+    }
+
     
     function getStatus() public view returns (bool){
         return s_funded;
@@ -223,7 +309,9 @@ contract Campaign is Ownable {
         return info;
 
     }
-
+    function getMilestone(uint256 index) public view returns(Milestone memory){
+        return milestones[index];
+    }
 
 
     function getGoal() external view returns (uint256) {

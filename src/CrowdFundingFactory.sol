@@ -8,7 +8,6 @@ import {CrowdFundingFactoryLibary} from "./libary/CrowdFundingLiary.sol";
 // import "./error.sol";
 
 contract CrowdFundingFactory {
-   
 
     uint256 private s_campaignCounter;
     uint256 private s_minimumEth = 2;

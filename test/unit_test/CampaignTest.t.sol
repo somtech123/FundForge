@@ -26,6 +26,9 @@ contract CampaignTest is Test {
     uint256 private constant VALID_FUND = 2;
     string private constant VALID_DESC = "phase 1";
 
+    string private constant VALID_DESC_2 = "phase 2";
+    string private constant VALID_DESC_3 = "phase 3";
+
     function setUp() public {
         factory = new CrowdFundingFactory();
 
@@ -65,6 +68,18 @@ contract CampaignTest is Test {
     modifier addMilestoneTarget(){
         campaign.addMilestone(VALID_DESC, VALID_GOAL);
         _;
+    }
+
+    modifier submitMilestone(){
+        
+        campaign.submitMilestone(0);
+        _;
+    }
+
+    modifier fundCampaign(){
+        campaign.fundCampaign{value: 6 ether}();
+        _;
+
     }
 
 
@@ -322,6 +337,127 @@ contract CampaignTest is Test {
         assertEq(address(campaign).balance, VALID_GOAL *1e18);
 
     }
+
+    /// submit milestone
+
+      function testSubmitMilestoneNotOwner() public asCreator addMilestoneTarget{
+
+        
+        vm.startPrank(ATTACKER);
+        vm.expectRevert(Campaign.Campaign__NotOwner.selector);
+
+        campaign.submitMilestone(0);
+        vm.stopPrank();
+
+    }
+
+    function testSubmitValidMilestoneIndex() public asCreator{
+        campaign.addMilestone(VALID_DESC, VALID_FUND);
+
+        vm.expectRevert(Campaign.Campaign__InvalidMilesToneIndex.selector);
+        
+        campaign.submitMilestone(2);
+
+    }
+
+    function testSubmitMilestoneWithGoalNotMeet() public asCreator{
+         campaign.addMilestone(VALID_DESC, VALID_FUND);
+
+        vm.expectRevert(Campaign.Campaign__TotalMilesToneTargetNotMeet.selector);
+        
+        campaign.submitMilestone(0);
+    }
+
+    function testSubmitAlreadyClaimedMilestone() public asCreator addMilestoneTarget{
+        campaign.fundCampaign{value: 6 ether}();
+
+        campaign.submitMilestone(0);
+
+        vm.expectRevert(Campaign.Campaign__AlreayCompleted.selector);
+        
+        campaign.submitMilestone(0);
+
+    }
+
+    function testSubmitMilestoneEmitSuccessfully() public asCreator addMilestoneTarget{
+         vm.expectEmit(true, false, false, true);
+
+         emit Campaign.SubmitMilestone(USER, true);
+
+         campaign.submitMilestone(0);
+
+    }
+
+    //Withdraw milestones
+
+    function testOnlyOwnerCanWithdrawMilestone() public asCreator addMilestoneTarget submitMilestone{
+
+        vm.startPrank(ATTACKER);
+        vm.expectRevert(Campaign.Campaign__NotOwner.selector);
+
+        campaign.withdraw(0);
+        vm.stopPrank();
+
+    }
+
+    function testOnlyOwner()public asCreator addMilestoneTarget fundCampaign submitMilestone{
+        campaign.withdraw(0);
+
+        assertTrue(USER == campaign.owner());
+
+    }
+    function testWithdrawalIndex() public asCreator{
+     
+
+        campaign.addMilestone(VALID_DESC, 2);
+
+        campaign.addMilestone(VALID_DESC_2, 2);
+
+        campaign.addMilestone(VALID_DESC_3, 2);
+
+        campaign.fundCampaign{value: 6 ether}();
+        campaign.submitMilestone(1);
+
+        vm.expectRevert(Campaign.Campaign__InvalidMilesToneIndex.selector);
+
+        campaign.withdraw(3);
+
+    }
+
+    function testWithdrawalMutipletimes() public asCreator addMilestoneTarget fundCampaign submitMilestone{
+
+        campaign.withdraw(0);
+
+        vm.expectRevert(Campaign.Campaign_AlreadyPaidMilestone.selector);
+        
+        campaign.withdraw(0);
+        
+    }
+
+    function testWithdrawalEmitSuccessfully() public asCreator addMilestoneTarget fundCampaign submitMilestone{
+        Campaign.Milestone memory _milestone = campaign.getMilestone(0);
+
+         vm.expectEmit(true, false, false, true);
+         
+         emit Campaign.WithdrawMilestoneAmount(USER, _milestone.amount);
+
+         campaign.withdraw(0);
+
+    }
+
+    function testReetrancy() public{
+
+        address campaignAddress = factory.createCampaign{value: MIN_FEE}(
+            VALID_GOAL,
+            VALID_DURATION
+        );
+        campaign = Campaign(campaignAddress);
+
+        vm.deal(ATTACKER, STARTING_BALANCE);
+
+    }
+
+  
 
     
 
