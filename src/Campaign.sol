@@ -260,7 +260,7 @@ contract Campaign is Ownable {
 
 
 
-    function refund() public external payable onlyValidCampaign nonReentrant {
+    function refundContributors() public onlyValidCampaign nonReentrant {
         if(block.timestamp > s_deadline) revert Campaign__CampaignStillActive();
 
         if(totalMilestoneTarget >= s_goal) revert Campaign__CampaignGoalMeet();

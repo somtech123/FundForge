@@ -6,6 +6,9 @@ import {console} from "forge-std/console.sol";
 import {Campaign} from "../../src/Campaign.sol";
 import {CrowdFundingFactory} from "../../src/CrowdFundingFactory.sol";
 import {CrowdFundingFactoryLibary} from  "../../src/libary/CrowdFundingLiary.sol";
+import {ReentrancyAttack} from '../mock/reentrancyAttacker.sol';
+
+
 
 contract CampaignTest is Test {
     Campaign campaign;
@@ -14,6 +17,7 @@ contract CampaignTest is Test {
     address USER = makeAddr("user");
     address ANOTHER_USER = makeAddr("another_user");
     address ATTACKER = makeAddr("attacker");
+    address ATTACKER_3 = makeAddr("attacker3");
 
    
     uint256 constant MIN_FEE = 1000000000000000;
@@ -35,6 +39,7 @@ contract CampaignTest is Test {
         vm.deal(USER, STARTING_BALANCE);
         vm.deal(ANOTHER_USER, STARTING_BALANCE);
         vm.deal(ATTACKER, STARTING_BALANCE);
+        vm.deal(ATTACKER_3, STARTING_BALANCE);
 
         vm.prank(USER);
         address campaignAddress = factory.createCampaign{value: MIN_FEE}(
@@ -446,14 +451,35 @@ contract CampaignTest is Test {
     }
 
     function testReetrancy() public{
+        Campaign _campaign;
+        ReentrancyAttack attacker = new ReentrancyAttack();
+        vm.deal(address(attacker), 7 ether);
 
-        address campaignAddress = factory.createCampaign{value: MIN_FEE}(
+        vm.startPrank(address(attacker));
+        
+         address campaignAddress = factory.createCampaign{value: MIN_FEE}(
             VALID_GOAL,
             VALID_DURATION
         );
-        campaign = Campaign(campaignAddress);
+        _campaign = Campaign(campaignAddress);
 
-        vm.deal(ATTACKER, STARTING_BALANCE);
+        attacker.setCampaign(address(_campaign));
+    
+        _campaign.addMilestone(VALID_DESC, VALID_GOAL);
+
+        vm.startPrank(USER);
+        _campaign.fundCampaign{value: 6 ether}();
+        vm.stopPrank();
+
+        vm.prank(address(attacker));
+        _campaign.submitMilestone(0);
+
+        vm.expectRevert(Campaign.Campaign_TransferFailed.selector);
+
+        attacker.attack{value: 0 ether}();
+        
+         vm.stopPrank();
+        
 
     }
 
