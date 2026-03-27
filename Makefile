@@ -6,6 +6,7 @@ test:; forge test
 
 test-campaign:; forge test --match-path test/unit_test/CampaignTest.t.sol 
 test-factory:; forge test --match-path test/unit_test/CrowdFundingFactoryTest.t.sol
+test-integration:; forge test --match-path test/integration_test/crowdfundingIntegrationTest.t.sol
 
 deploy:
 	@forge script script/DeployedCrowndFundingFactory.s.sol:DeployedCrowndFundingFactory --rpc-url $(RPC_URL) --private-key $(PRIVATE_KEY) --broadcast

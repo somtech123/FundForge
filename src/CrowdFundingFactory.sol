@@ -14,39 +14,6 @@ import {CrowdFundingFactoryLibary} from "./libary/CrowdFundingLiary.sol";
  */
 
 contract CrowdFundingFactory {
-    /// @notice Thrown when the campaign goal is below the minimum allowed ETH amount.
-    error CrowdFundingFactory__LessThanMinimumGoal();
-
-    /// @notice Thrown when the provided goal is zero or otherwise invalid.
-    error CrowdFundingFactory__InvalidGoal();
-
-    /// @notice Thrown when the provided deadline resolves to zero duration.
-    error CrowdFundingFactory__InvalidDeadLine();
-
-    /// @notice Thrown when the deadline exceeds the maximum allowed duration (365 days).
-    error CrowdFundingFactory__DeadLineToFar();
-
-    /// @notice Thrown when the deadline is too close to the current time (≤ 1 day).
-    error CrowdFundingFactory__DeadLineTooClose();
-
-    /// @notice Thrown when the ETH sent is less than the required creation fee.
-    error CrowdFundingFactory__InsufficientFee();
-
-    //=======================================================
-    //        Events
-    //=======================================================
-
-    /// @notice Emitted when a new campaign is successfully created.
-    /// @param creator The address of the campaign creator.
-    /// @param feesPaid The amount of ETH (in wei) paid as the creation fee.
-    /// @param campaignId The ID assigned to the newly created campaign.
-
-    event CampaignCreated(
-        address indexed creator,
-        uint256 feesPaid,
-        uint256 campaignId
-    );
-
     //=======================================================
     //        State Variables
     //=======================================================
@@ -64,6 +31,43 @@ contract CrowdFundingFactory {
     mapping(address => bool) private s_isCampaign;
 
     mapping(address => address) private s_campaignFactory;
+
+    //=======================================================
+    //        Events
+    //=======================================================
+
+    /// @notice Emitted when a new campaign is successfully created.
+    /// @param creator The address of the campaign creator.
+    /// @param feesPaid The amount of ETH (in wei) paid as the creation fee.
+    /// @param campaignId The ID assigned to the newly created campaign.
+
+    event CampaignCreated(
+        address indexed creator,
+        uint256 feesPaid,
+        uint256 campaignId
+    );
+
+    //═══════════════════════════════════════════════════════
+    //   ERRORS
+    // ═══════════════════════════════════════════════════════
+
+    /// @notice Thrown when the campaign goal is below the minimum allowed ETH amount.
+    error CrowdFundingFactory__LessThanMinimumGoal();
+
+    /// @notice Thrown when the provided goal is zero or otherwise invalid.
+    error CrowdFundingFactory__InvalidGoal();
+
+    /// @notice Thrown when the provided deadline resolves to zero duration.
+    error CrowdFundingFactory__InvalidDeadLine();
+
+    /// @notice Thrown when the deadline exceeds the maximum allowed duration (365 days).
+    error CrowdFundingFactory__DeadLineToFar();
+
+    /// @notice Thrown when the deadline is too close to the current time (≤ 1 day).
+    error CrowdFundingFactory__DeadLineTooClose();
+
+    /// @notice Thrown when the ETH sent is less than the required creation fee.
+    error CrowdFundingFactory__InsufficientFee();
 
     //=======================================================
     //        External Functions
