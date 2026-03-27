@@ -8,6 +8,8 @@ artifacts/
 lib/
 # foundry
 broadcast/
+broadcast/DeployedCrowndFundingFactory.s.sol
+broadcast/DeployedCrowndFundingFactory.s.sol/11155111
 # remix
 .vscode/
 .states/
