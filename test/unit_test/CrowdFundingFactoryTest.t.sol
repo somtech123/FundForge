@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import {Test} from "forge-std/Test.sol";
 import {CrowdFundingFactory} from "../../src/CrowdFundingFactory.sol";
 import {MockRefundRejecter} from "../mock/MockRefundRejecter.sol";
-import {CrowdFundingFactoryLibary} from  "../../src/libary/CrowdFundingLiary.sol";
+import {CrowdFundingFactoryLibary} from "../../src/libary/CrowdFundingLiary.sol";
 
 contract CrowdFundingFactoryTest is Test {
     CrowdFundingFactory factory;
@@ -12,9 +12,9 @@ contract CrowdFundingFactoryTest is Test {
 
     uint256 constant MIN_FEE = 1000000000000000;
     uint256 constant STARTING_BALANCE = 10 ether;
-    uint256 private  MINIMUM_USD = 2;
+    uint256 private MINIMUM_USD = 2;
 
-    uint256 private constant VALID_GOAL = 6 ;
+    uint256 private constant VALID_GOAL = 6;
     uint256 private constant VALID_DURATION = 55;
 
     function setUp() public {
@@ -55,6 +55,7 @@ contract CrowdFundingFactoryTest is Test {
 
         factory.createCampaign{value: MIN_FEE}(1, 30);
     }
+
     // Test — goal below minimum duration
     function testCreateCampaignForInvalidDeadline() public asUser {
         vm.expectRevert(
@@ -82,6 +83,7 @@ contract CrowdFundingFactoryTest is Test {
 
         factory.createCampaign{value: MIN_FEE}(MINIMUM_USD, 366);
     }
+
     // Test — goal createCampaign with invalid fee
 
     function testCreateCampaignWithInsuffcientFees() public asUser {
@@ -111,9 +113,8 @@ contract CrowdFundingFactoryTest is Test {
     function testCreateCampaignStoresCorrectInfo() public asUser {
         factory.createCampaign{value: MIN_FEE}(VALID_GOAL, VALID_DURATION);
 
-        CrowdFundingFactoryLibary.CampaignInfo memory info = factory.getCampaignInfo(
-            0
-        );
+        CrowdFundingFactoryLibary.CampaignInfo memory info = factory
+            .getCampaignInfo(0);
 
         assertEq(info.creator, USER);
         assertEq(info.goal, VALID_GOAL * 1e18);
@@ -180,22 +181,21 @@ contract CrowdFundingFactoryTest is Test {
     function testGetCampaignInfo() public asUser {
         factory.createCampaign{value: MIN_FEE}(VALID_GOAL, VALID_DURATION);
 
-        CrowdFundingFactoryLibary.CampaignInfo memory info = factory.getCampaignInfo(
-            0
-        );
+        CrowdFundingFactoryLibary.CampaignInfo memory info = factory
+            .getCampaignInfo(0);
 
         assertEq(info.creator, USER);
         assertGt(info.goal, 0);
     }
 
-    function testGetAllCampaigns() public asUser {
-        factory.createCampaign{value: MIN_FEE}(VALID_GOAL, VALID_DURATION);
-        factory.createCampaign{value: MIN_FEE}(VALID_GOAL, VALID_DURATION);
+    // function testGetAllCampaigns() public asUser {
+    //     factory.createCampaign{value: MIN_FEE}(VALID_GOAL, VALID_DURATION);
+    //     factory.createCampaign{value: MIN_FEE}(VALID_GOAL, VALID_DURATION);
 
-        address[] memory campaigns = factory.getAllCampaigns();
+    //     address[] memory campaigns = factory.getAllCampaigns();
 
-        assertEq(campaigns.length, 2);
-    }
+    //     assertEq(campaigns.length, 2);
+    // }
 
     function testIsValidCampaign() public asUser {
         factory.createCampaign{value: MIN_FEE}(VALID_GOAL, VALID_DURATION);

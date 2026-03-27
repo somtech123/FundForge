@@ -166,6 +166,9 @@ contract Campaign is Ownable {
     /// @notice Thrown when refund is attempted by non-contributor
     error Campaign__ZeroContribution();
 
+    /// @notice Thrown when milestone not submitted before withdrawal
+    error Campaign__MilestoneNotCompleted();
+
     // ═══════════════════════════════════════════════════════
     //   MODIFIERS
     // ═══════════════════════════════════════════════════════
@@ -222,7 +225,7 @@ contract Campaign is Ownable {
     /// @param _creator Address of the campaign creator — becomes Ownable owner
     /// @param _factory Address of the deploying factory contract
     /// @param _goal Funding goal in wei
-    /// @param _deadline Unix timestamp of campaign end time
+    /// @param _deadine Unix timestamp of campaign end time
     constructor(
         address _creator,
         address _factory,
@@ -391,7 +394,8 @@ contract Campaign is Ownable {
             revert Campaign__InvalidMilesToneIndex();
 
         Milestone storage _milestone = milestones[index];
-        if (_milestone.completed == false) revert Campaign__AlreayCompleted();
+        if (_milestone.completed == false)
+            revert Campaign__MilestoneNotCompleted();
 
         if (_milestone.paid == true) revert Campaign_AlreadyPaidMilestone();
 
@@ -417,12 +421,13 @@ contract Campaign is Ownable {
     ///      - Caller must have a non-zero contribution
 
     function refundContributors() public onlyValidCampaign nonReentrant {
-        if (block.timestamp > s_deadline)
+        if (block.timestamp < s_deadline)
             revert Campaign__CampaignStillActive();
 
-        if (totalMilestoneTarget >= s_goal) revert Campaign__CampaignGoalMeet();
-
         CampaignState storage _state = s_campaignState[address(this)];
+        uint256 totalFunded = _state.totalFunded;
+
+        if (totalFunded >= s_goal) revert Campaign__CampaignGoalMeet();
 
         uint256 amountContributed = _state.contributors[msg.sender];
 
@@ -509,5 +514,22 @@ contract Campaign is Ownable {
     /// @return uint256 Length of the milestones array
     function getTotalMileStoneLength() external view returns (uint256) {
         return milestones.length;
+    }
+
+    function getMileStoneTotalFunded(
+        uint256 index
+    ) external view returns (uint256) {
+        Milestone storage _milestone = milestones[index];
+        return _milestone.amount;
+    }
+
+    function getamountContributed(
+        address user
+    ) external view returns (uint256) {
+        CampaignState storage _state = s_campaignState[address(this)];
+
+        uint256 _amountContributed = _state.contributors[user];
+
+        return _amountContributed;
     }
 }
